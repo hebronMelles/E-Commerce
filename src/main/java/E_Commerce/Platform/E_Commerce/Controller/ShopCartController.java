@@ -67,8 +67,8 @@ public class ShopCartController {
     }
 
     @PutMapping("/place-order")
-    public ResponseEntity<String> placeOrder(@RequestParam long userId,@RequestParam long shopId){
-       shopCartService.placeOrder(userId,shopId);
+    public ResponseEntity<String> placeOrder(@RequestParam long userid,@RequestParam long shopid){
+       shopCartService.placeOrder(userid,shopid);
        return  ResponseEntity.ok("Successfully placed order");
     }
 }

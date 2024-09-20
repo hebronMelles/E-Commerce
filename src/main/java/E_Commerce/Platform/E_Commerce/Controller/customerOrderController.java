@@ -41,9 +41,9 @@ public class customerOrderController {
         return orderService.getOrderById(id);
     }
 
-    @PutMapping("/confirm/{id}")
-    public ResponseEntity<String> confirmOrder(@PathVariable long id){
-        orderService.confirmOrder(id);
-        return ResponseEntity.ok("Successfully confirmed order");
+    @PutMapping("/confirm")
+    public ResponseEntity<String> confirmOrder(@RequestParam long orderid,@RequestParam long shopid){
+        double totalPrice = orderService.confirmOrder(orderid,shopid);
+        return ResponseEntity.ok("Successfully confirmed order and your total price is " + totalPrice );
     }
 }

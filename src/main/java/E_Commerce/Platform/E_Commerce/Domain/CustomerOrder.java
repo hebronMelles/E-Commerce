@@ -1,11 +1,12 @@
 package E_Commerce.Platform.E_Commerce.Domain;
 
+import E_Commerce.Platform.E_Commerce.Enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -18,6 +19,7 @@ public class CustomerOrder {
     private long orderId;
     @OneToOne
     private ShopCart shopCart;
-    private String status;
-    private LocalDate orderDate;
+    @Enumerated(EnumType.STRING)
+    private Status status;
+    private LocalDateTime orderDate;
 }

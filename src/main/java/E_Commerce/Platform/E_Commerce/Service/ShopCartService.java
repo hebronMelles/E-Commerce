@@ -1,20 +1,18 @@
 package E_Commerce.Platform.E_Commerce.Service;
 
-import E_Commerce.Platform.E_Commerce.Domain.CustomerOrder;
-import E_Commerce.Platform.E_Commerce.Domain.Product;
-import E_Commerce.Platform.E_Commerce.Domain.ShopCart;
-import E_Commerce.Platform.E_Commerce.Domain.User;
-import E_Commerce.Platform.E_Commerce.Repository.CustomerOrderRepository;
-import E_Commerce.Platform.E_Commerce.Repository.ProductRepository;
-import E_Commerce.Platform.E_Commerce.Repository.ShopCartRepository;
-import E_Commerce.Platform.E_Commerce.Repository.UserRepository;
+import E_Commerce.Platform.E_Commerce.Domain.*;
+import E_Commerce.Platform.E_Commerce.Repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import static E_Commerce.Platform.E_Commerce.Enums.Role.ADMIN;
+import static E_Commerce.Platform.E_Commerce.Enums.Status.OrderPlaced;
 
 @Service
 public class ShopCartService {
@@ -27,6 +25,9 @@ public class ShopCartService {
     private UserRepository userRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private AdminDashBoardRepository adminDashBoardRepository;
+
 
     public void saveShopCart(ShopCart shopCart){
 
@@ -71,11 +72,9 @@ public class ShopCartService {
         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
 
         Map<Product, Integer> productsWithQuantity = shopCart.getProductsWithQuantity();
-        int currentQuantity = productsWithQuantity.getOrDefault(product, 0);
-
-        if (currentQuantity < 1) {
+        Integer currentQuantity = productsWithQuantity.get(product);
             productsWithQuantity.put(product, currentQuantity + 1);
-        }
+
 
         shopCartRepository.save(shopCart);
 
@@ -87,7 +86,7 @@ public class ShopCartService {
         Map<Product, Integer> productsWithQuantity = shopCart.getProductsWithQuantity();
         int currentQuantity = productsWithQuantity.getOrDefault(product, 0);
 
-        if (currentQuantity > 1) {
+        if (currentQuantity > 0) {
             productsWithQuantity.put(product, currentQuantity - 1);
         } else {
             productsWithQuantity.remove(product);
@@ -96,13 +95,20 @@ public class ShopCartService {
         shopCartRepository.save(shopCart);
 
     }
+    @Transactional
     public void placeOrder(long userId,long shopId){
         User user = userRepository.findById(userId).orElse(null);
+        User adminUser = userRepository.findAll().stream().filter(role -> role.getRole().equals(ADMIN)).findFirst().get();
+        System.out.println(adminUser.getId());
+        AdminDashBoard adminDashBoard = adminDashBoardRepository.findById(adminUser.getId()).orElse(null);
         ShopCart shopCart = getShopCartById(shopId);
         shopCart.setUser(user);
         shopCartRepository.save(shopCart);
-        CustomerOrder customerOrder = new CustomerOrder(userId,shopCart,null,null);
+        CustomerOrder customerOrder = createCustomerOrder(shopCart);
+        System.out.println("this is customer order" + customerOrder.getOrderId());
         customerOrderRepository.save(customerOrder);
+        adminDashBoard.getCustomerOrders().add(customerOrder);
+       adminDashBoardRepository.save(adminDashBoard);
     }
     public boolean productExistInProducts(long productId){
         List<Product> productList = productRepository.findAll();
@@ -113,7 +119,13 @@ public class ShopCartService {
         ShopCart shopCart = getShopCartById(shopId);
        return shopCart.getProductsWithQuantity().containsValue(productId);
     }
-
+    public CustomerOrder createCustomerOrder(ShopCart shopCart){
+        CustomerOrder customerOrder= new CustomerOrder();
+        customerOrder.setOrderDate(LocalDateTime.now());
+        customerOrder.setShopCart(shopCart);
+        customerOrder.setStatus(OrderPlaced);
+        return customerOrder;
+    }
 
 
 }

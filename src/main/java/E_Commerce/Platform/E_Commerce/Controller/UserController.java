@@ -13,7 +13,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping()
+    @PostMapping(value = "/add")
     public ResponseEntity<String> saveUser(@RequestBody User user){
         if(userService.userExist(user.getEmail())){
             return ResponseEntity.ok("User with " + user.getEmail() + " Already Exist");

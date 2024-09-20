@@ -18,8 +18,6 @@ public class ShopCart {
     private long shopCartId;
     @OneToOne
     private User user;
-//    @OneToMany
-//    private List<Product> productList;
     @ElementCollection
     @CollectionTable(name = "cart_products", joinColumns = @JoinColumn(name = "shop_cart_id"))
     @MapKeyJoinColumn(name = "product_id")

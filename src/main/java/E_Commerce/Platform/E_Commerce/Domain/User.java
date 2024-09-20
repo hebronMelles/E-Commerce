@@ -2,6 +2,7 @@ package E_Commerce.Platform.E_Commerce.Domain;
 
 import E_Commerce.Platform.E_Commerce.Enums.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class User {
     private Role role;
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
+    @JsonIgnore
     private ShopCart shopCart;
+
 
 }
